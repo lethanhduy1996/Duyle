@@ -1,0 +1,53 @@
+name: Build IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Show schemes
+        run: xcodebuild -list
+
+      - name: Build app
+        run: |
+          xcodebuild \
+            -project 1996App.xcodeproj \
+            -scheme 1996App \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            clean build
+
+      - name: Create IPA
+        run: |
+          APP_PATH=$(find build/Build/Products/Release-iphoneos -name "*.app" | head -1)
+
+          if [ -z "$APP_PATH" ]; then
+            echo "Không tìm thấy file .app"
+            exit 1
+          fi
+
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+
+          zip -r 1996App.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: 1996App-IPA
+          path: 1996App.ipa
