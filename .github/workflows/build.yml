@@ -23,8 +23,8 @@ jobs:
       - name: Build app
         run: |
           xcodebuild \
-            -project 1996App.xcodeproj \
-            -scheme 1996App \
+            -project 1996.xcodeproj \
+            -scheme 1996 \
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath build \
